@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gerador de Sinais</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+    button { padding: 10px 20px; font-size: 18px; }
+    #resultado { margin-top: 20px; font-size: 24px; color: green; }
+  </style>
+</head>
+<body>
+  <h1>Gerador de Sinais de Opções Binárias</h1>
+  <button onclick="gerarSinal()">Gerar Sinal</button>
+  <div id="resultado"></div>
+
+  <script>
+    function gerarSinal() {
+      // Simulando dados fictícios
+      let preco = 100 + Math.random() * 20;
+      let ssma = 105;
+      let fluxo = Math.random() > 0.5 ? "ALTA" : "BAIXA";
+      let rompimento00 = Math.floor(preco) % 10 === 0;
+
+      let sinal = "Sem sinal";
+      if (rompimento00) {
+        if (fluxo === "ALTA" && preco > ssma) sinal = "📈 SINAL DE COMPRA";
+        else if (fluxo === "BAIXA" && preco < ssma) sinal = "📉 SINAL DE VENDA";
+      }
+
+      document.getElementById("resultado").textContent = sinal + ` | Preço: ${preco.toFixed(2)} | Fluxo: ${fluxo}`;
+    }
+  </script>
+</body>
+</html>
