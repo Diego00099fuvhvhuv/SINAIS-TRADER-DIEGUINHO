@@ -1,0 +1,73 @@
+import ccxt  # Biblioteca para integrar com corretoras
+import talib  # Para análise técnica
+import numpy as np
+import pandas as pd
+import time
+import requests  # Para enviar sinais via webhook (por exemplo, para o Telegram)
+from datetime import datetime
+
+# Conectar-se à corretora usando a API (exemplo com a IQ Option, mas será genérico)
+exchange = ccxt.iqoption()
+
+# Função para obter dados históricos (OHLCV)
+def get_data(symbol, timeframe='1m'):
+    ohlcv = exchange.fetch_ohlcv(symbol, timeframe)
+    ohlcv = np.array(ohlcv)
+    return ohlcv[:, 4]  # Retorna os preços de fechamento
+
+# Função para calcular a Média Móvel SSMA (9)
+def calculate_ssma(data, period=9):
+    return talib.SMA(data, timeperiod=period)
+
+# Função para verificar rompimento das regiões de suporte/resistência
+def check_breakout(price, support, resistance):
+    if price > resistance:
+        return "BREAKOUT UP"
+    elif price < support:
+        return "BREAKOUT DOWN"
+    return "NO BREAKOUT"
+
+# Função principal de análise e geração de sinais
+def generate_signal(symbol, support=100.00, resistance=110.00, timeframe='1m'):
+    data = get_data(symbol, timeframe)
+    ssma = calculate_ssma(data)
+    
+    # Detectando cruzamentos da Média Móvel SSMA
+    signal = None
+    if data[-1] > ssma[-1] and data[-2] < ssma[-2]:
+        signal = 'BUY'
+    elif data[-1] < ssma[-1] and data[-2] > ssma[-2]:
+        signal = 'SELL'
+    
+    # Verificando rompimento de suporte/resistência
+    breakout_signal = check_breakout(data[-1], support, resistance)
+    
+    if breakout_signal == "BREAKOUT UP":
+        signal = 'BUY'
+    elif breakout_signal == "BREAKOUT DOWN":
+        signal = 'SELL'
+    
+    return signal
+
+# Função para enviar o sinal via Webhook (exemplo com Telegram)
+def send_signal_to_telegram(signal):
+    telegram_url = "https://api.telegram.org/bot<your_bot_token>/sendMessage"
+    chat_id = "<your_chat_id>"
+    message = f"Novo sinal gerado: {signal}"
+    payload = {
+        'chat_id': chat_id,
+        'text': message
+    }
+    requests.post(telegram_url, data=payload)
+
+# Função para rodar a lógica em tempo real
+def run(symbol='EUR/USD', timeframe='1m'):
+    while True:
+        signal = generate_signal(symbol)
+        if signal:
+            send_signal_to_telegram(signal)
+        time.sleep(60)  # Aguardar 1 minuto para próxima execução
+
+# Iniciar o gerador de sinais
+if __name__ == "__main__":
+    run()
