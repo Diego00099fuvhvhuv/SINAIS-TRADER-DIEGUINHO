@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Gerador de Sinais - Bullex</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  /* Reset */
+  * {
+    margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif;
+  }
+
+  body {
+    background: linear-gradient(135deg, #0a122a, #141c3a);
+    color: #fff;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 30px 20px;
+  }
+
+  header {
+    display: flex; align-items: center; gap: 15px;
+    margin-bottom: 30px;
+  }
+  header img {
+    width: 60px; height: 60px;
+  }
+  header h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #00b4d8;
+    text-shadow: 0 0 15px #00b4d8aa;
+  }
+
+  main {
+    background: #1b2437cc;
+    padding: 30px 35px;
+    border-radius: 18px;
+    max-width: 650px;
+    width: 100%;
+    box-shadow: 0 15px 35px #000a;
+  }
+
+  /* Par buttons */
+  .par-buttons {
+    display: flex;
+    gap: 18px;
+    margin-bottom: 25px;
+    justify-content: center;
+  }
+  .par-btn {
+    background: #16223e;
+    padding: 12px 28px;
+    border-radius: 50px;
+    border: 2px solid transparent;
+    color: #a3b1c6;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+  }
+  .par-btn.active, .par-btn:hover {
+    background: #00b4d8;
+    color: #fff;
+    border-color: #00b4d8;
+    box-shadow: 0 0 10px #00b4d8aa;
+  }
+
+  /* Mercado select */
+  label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 8px;
+    color: #8dbcd4;
+  }
+  select {
+    width: 100%;
+    max-width: 280px;
+    padding: 10px 14px;
+    border-radius: 50px;
+    border: none;
+    margin-bottom: 25px;
+    font-size: 1.1rem;
+    color: #16223e;
+    font-weight: 600;
+  }
+
+  /* Sinal */
+  #sinal {
+    font-size: 2.4rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 18px;
+    border-radius: 15px;
+    margin-bottom: 22px;
+    box-shadow: 0 0 15px #0006;
+  }
+  #sinal.compra {
+    background: #2ecc7155;
+    color: #27ae6011;
+    text-shadow: 0 0 8px #2ecc71cc;
+  }
+  #sinal.venda {
+    background: #e74c3c55;
+    color: #c0392b11;
+    text-shadow: 0 0 8px #e74c3ccc;
+  }
+
+  /* Detalhes */
+  #detalhes {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 30px;
+  }
+  #detalhes > div {
+    background: #0f1a36;
+    padding: 15px 22px;
+    border-radius: 14px;
+    min-width: 110px;
+    font-weight: 600;
+    text-align: center;
+    color: #a3b1c6;
+    box-shadow: inset 0 0 10px #001529aa;
+  }
+  #detalhes > div strong {
+    display: block;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+    color: #00b4d8;
+  }
+
+  /* Botão gerar */
+  button#btn-gerar {
+    background: #00b4d8;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 50px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto 20px auto;
+    box-shadow: 0 8px 25px #00b4d8aa;
+    transition: background 0.3s ease;
+  }
+  button#btn-gerar:hover {
+    background: #007a9e;
+  }
+
+  /* Gráfico */
+  canvas#grafico {
+    width: 100% !important;
+    height: 300px !important;
+    border-radius: 18px;
+    background: #0a1b3d;
+    box-shadow: 0 10px 25px #000a;
+  }
+
+  footer {
+    margin-top: 40px;
+    font-size: 0.9rem;
+    opacity: 0.5;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="https://bullex.com.br/wp-content/uploads/2021/08/logo-bullex-1.png" alt="Logo Bullex" />
+  <h1>Gerador de Sinais Bullex</h1>
+</header>
+
+<main>
+  <div class="par-buttons">
+    <button class="par-btn active" data-par="EUR/USD">EUR/USD</button>
+    <button class="par-btn" data-par="EUR/USD OTC">EUR/USD OTC</button>
+  </div>
+
+  <label for="mercado">Escolha o Mercado:</label>
+  <select id="mercado">
+    <option value="aberto">Mercado Aberto</option>
+    <option value="otc">Mercado OTC</option>
+  </select>
+
+  <div id="sinal" class="">Clique em "Gerar Sinal"</div>
+
+  <div id="detalhes">
+    <div>
+      <strong>Par</strong>
+      <span id="par-selecionado">EUR/USD</span>
+    </div>
+    <div>
+      <strong>Tempo</strong>
+      <span id="tempo">--:--</span>
+    </div>
+    <div>
+      <strong>Prob. Acerto</strong>
+      <span id="acerto">--%</span>
+    </div>
+    <div>
+      <strong>Tipo</strong>
+      <span id="tipo">--</span>
+    </div>
+    <div>
+      <strong>Mercado</strong>
+      <span id="mercado-selecionado">--</span>
+    </div>
+  </div>
+
+  <button id="btn-gerar">Gerar Sinal</button>
+
+  <canvas id="grafico"></canvas>
+</main>
+
+<footer>© 2025 Diego00099fuvhvhuv</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@3.5.0/dist/chartjs-chart-financial.min.js"></script>
+<script>
+  const btnGerar = document.getElementById('btn-gerar');
+  const sinalDiv = document.getElementById('sinal');
+  const tempoSpan = document.getElementById('tempo');
+  const acertoSpan = document.getElementById('acerto');
+  const tipoSpan = document.getElementById('tipo');
+  const mercadoSelect = document.getElementById('mercado');
+  const mercadoSpan = document.getElementById('mercado-selecionado');
+  const parSpan = document.getElementById('par-selecionado');
+  const parButtons = document.querySelectorAll('.par-btn');
+  const ctx = document.getElementById('grafico').getContext('2d');
+
+  let parSelecionado = "EUR/USD";
+
+  parButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      parButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      parSelecionado = btn.getAttribute('data-par');
+      parSpan.textContent = parSelecionado;
+    });
+  });
+
+  function gerarDadosVelas(qtde = 20) {
+    let dados = [];
+    let preco = 1.10 + Math.random() * 0.05;
+    for(let i = 0; i < qtde; i++) {
+      let aberto = preco + (Math.random() - 0.5) * 0.002;
+      let fechado = aberto + (Math.random() - 0.5) * 0.004;
+      let max = Math.max(aberto, fechado) + Math.random() * 0.0015;
+      let min = Math.min(aberto, fechado) - Math.random() * 0.0015;
+      dados.push({ t: i, o: aberto, h: max, l: min, c: fechado });
+      preco = fechado;
+    }
+    return dados;
+  }
+
+  let chart = new Chart(ctx, {
+    type: 'candlestick',
+    data: {
+      datasets: [{
+        label: 'Velas',
+        data: gerarDadosVelas(),
+        borderColor: '#00b4d8',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { display: false } }
+      }
+    }
+  });
+
+  function atualizarGrafico() {
+    chart.data.datasets[0].data = gerarDadosVelas();
+    chart.update();
+  }
+
+  function calcularSinal() {
+    const mercado = mercadoSelect.value;
+    const fluxo = Math.random() > 0.5 ? 'ALTA' : 'BAIXA';
+    const tempoEntrada = mercado === 'otc' ? 30 : 60;
+    const probAcerto = (Math.random() * 30 + 70).toFixed(2);
+    const tipo = fluxo === 'ALTA' ? 'COMPRA' : 'VENDA';
+
+    return { fluxo, tempoEntrada, probAcerto, tipo, mercado };
+  }
+
+  btnGerar.addEventListener('click', () => {
+    const sinal = calcularSinal();
+    sinalDiv.textContent = `SINAL DE ${sinal.tipo}`;
+    sinalDiv.className = sinal.tipo.toLowerCase();
+    tempoSpan.textContent = `${sinal.tempoEntrada}s`;
+    acertoSpan.textContent = `${sinal.probAcerto}%`;
+    tipoSpan.textContent = sinal.fluxo;
+    mercadoSpan.textContent = sinal.mercado === 'otc' ? 'OTC' : 'Aberto';
+
+    atualizarGrafico();
+  });
+
+  // Inicializa
+  parSpan.textContent = parSelecionado;
+  mercadoSpan.textContent = mercadoSelect.value === 'otc' ? 'OTC' : 'Aberto';
+</script>
+
+</body>
+</html>
